@@ -1,0 +1,136 @@
+<!--
+	This game represents my first exposure to html canvas elements.
+-->
+
+
+
+
+<link rel="stylesheet" type="text/css" href="BouncingBalls.css">
+<title>Bouncing Balls</title>
+<canvas id="c"></canvas>
+<script type="text/javascript">
+window.onload = function(){
+	var canvas = document.getElementById("c");
+	var ctx = canvas.getContext("2d");
+	var W = window.innerWidth, H = window.innerHeight;
+	canvas.width = W;
+	canvas.height = H;
+	document.onkeydown = keyDown;
+	document.onkeyup = keyUp;
+	//creates a new particle, or ball.
+	function particle()
+	{
+		this.x = Math.random() * 100;
+		this.y = Math.random() * 100;
+		this.xspeed = 20 * Math.random();
+		this.yspeed = 0;
+		this.col = "rgba(" + Math.floor(Math.random()*256) + "," + Math.floor(Math.random()*256) + "," + Math.floor(Math.random()*256) + "," + 1 + ")";
+		this.radius = 10 + 10*Math.random();
+	}
+	//holds all of the particles.
+	var particles = new Array()
+	particles.push(new particle());
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, W, H);
+	var n = 0;
+	//direction takes on three values: left, right, and straight. this represents the movement of the cursor.
+	var direction = "straight"
+	function keyDown(e){
+		e = e || window.event;
+		if (e.keyCode == '37'){
+			direction = "left"	
+		}
+		if (e.keyCode == '39'){
+			direction = "right"
+		}
+	}
+	function keyUp(e){
+		e = e || window.event;
+		if ((e.keyCode == '37' && direction == "left") || (e.keyCode == '39' && direction == "right")) {
+			direction = "straight"
+
+		}
+	}
+	var playerx = W/2;
+	var counter = 0;
+	var j = 200;
+	function draw()
+	{
+
+		ctx.globalCompositeOperation = "source-over";
+		ctx.fillStyle = "black";
+		ctx.fillRect(0, 0, W, H);
+		ctx.globalCompositeOperation = "lighter";
+		ctx.fillStyle = "white";
+		ctx.font = "15px Arial"
+		ctx.fillText(counter, 30, 30);
+		if (n == j){
+			particles.push(new particle());
+			n = 0;
+			if (j>100){
+				j-=3;
+			}
+			if (j>50){
+				j-= 2
+			}
+
+
+		}
+		n++;
+		if (direction == "left"){
+			if (playerx >= 10){
+				playerx = playerx - 15;
+			}
+		}
+		if (direction == "right"){
+			if (playerx <= (W-10)){
+				playerx = playerx + 15;
+			}
+		}
+		ctx.font = "15px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("<->", playerx, H)
+		for (i = 0; i < particles.length; i++) {
+			var p = particles[i];
+			ctx.beginPath();
+			ctx.arc(p.x, p.y, p.radius, 0, 2*Math.PI);
+			ctx.fillStyle = p.col;
+			ctx.fill();
+			p.yspeed++;
+			p.x += p.xspeed;
+			p.y += p.yspeed;
+			if (p.x >= W){
+				p.x = W;
+				p.xspeed = -.95 * p.xspeed;
+			}
+			if (p.x <= 0){
+				p.x = 0;
+				p.xspeed = -.95 * p.xspeed;
+			}
+			if (p.y <= 0){
+				p.y = 0;
+				p.yspeed = -.95 * p.yspeed;
+			}
+			if (p.y >= H){
+				if (Math.abs(p.x - playerx) < (p.radius + 20))
+				{
+					alert("Game Over. You have dodged " + counter + " balls.");
+					counter = 0;
+					j = 200;
+					direction = "straight";
+					particles = new Array();
+				}
+				p.y = H;
+				p.yspeed = -.9 * p.yspeed
+			}
+			if (p.yspeed >= -3 && p.yspeed <= 0 && p.y >= (H-100)){
+				particles.splice(i, 1)
+				counter++;
+			}
+		}
+
+
+	}
+	setInterval(draw, 40);
+}
+</script>
